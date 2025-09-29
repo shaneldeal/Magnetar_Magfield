@@ -1,0 +1,112 @@
+<comment>
+problem   = Parker Wind
+configure = --prob parker_my_IC --coord spherical_polar --eos general/helmholtz -hdf5 -mpi -h5double
+
+<job>
+problem_id = parker  # problem ID: basename of output filenames
+
+<output1>
+file_type  = hdf5      # Binary data dump
+variable   = prim      # variables to be output
+id         = prim
+dt         = 4.821335605e-2       # time increment between outputs (50.0)
+xdmf       = true      # write xdmf files
+
+<output2>
+file_type  = hdf5      # Binary data dump
+variable   = uov      # variables to be output
+id         = uov
+dt         = 4.821335605e-2      # time increment between outputs (50.0)
+xdmf       = true      # write xdmf files
+
+<output3>
+file_type  = rst
+id         = rst
+dt         = 4.821335605e-2
+
+<time>
+cfl_number = 0.3            # The Courant, Friedrichs, & Lewy (CFL) Number
+nlim       = -1         # cycle limit
+tlim       = 0.5           # time limit | 1 code time= 9.64267121e-5 s for 1.4 Msun, 8.06745623058699e-05 for 2.0 Msun 
+integrator  = rk2           # time integration algorithm
+xorder      = 2            # order of spatial reconstruction
+ncycle_out  = 4.821335605-1              # interval for stdout summary info
+
+
+<mesh>
+nx1        = 512           # Number of zones in X1-direction
+x1min      = 1.2e6              # minimum value of X1 | 
+x1max      = 1e9          # maximum value of X1 | 
+x1rat      = 1.01322226388 #(x1max/x1min)^(1.0/nx1)            # log spacing ratio
+ix1_bc     = user           # inner-X1 boundary flag
+ox1_bc     = user           # inner-X1 boundary flag
+
+nx2    	   = 256            # number of cells in theta-direction
+x2min  	   = 0.0            # minimum theta
+x2max  	   = 3.141592653589793  # maximum theta (pi)
+ix2_bc 	   = polar_wedge  # polar_wedge and polar handle fluxes through the pole; supports physically connecting the domain across the axes, allowing fluid to flow from one side to the other with 			           # no artificial boundary
+ox2_bc 	   = polar_wedge 
+
+nx3    	   = 1              # number of cells in phi-direction
+x3min  	   = 0.0            # minimum phi
+x3max  	   = 6.283185307179586  # maximum phi (2*pi)
+ix3_bc 	   = periodic       # clockwise boundary
+ox3_bc 	   = periodic       # counterclockwise boundary
+
+<meshblock>
+nx1 = 32
+nx2 = 16
+nx3 = 1
+
+
+
+<hydro>
+eos_rho_unit    = 1.0
+eos_egas_unit   = 1.0
+dfloor = 1e-20
+pfloor = 1e-20
+iso_sound_speed = 5e9
+helm_temp_index = 1
+eos_ye_index = 0
+
+<problem>
+rho_0 = 1e12                 
+GM = 1.85844204e26                   #1.4 Msun =1.85844204e26, 2.0 Msun= 2.655e26 
+Na=6.023e23                #Avagadro's constant
+L_nubar= 8.0                #units of 1e51 ergs/s 
+L_nu= 6.15384
+L_mu= 5.714
+eps_nubar= 14.0             #MeV
+eps_nu= 11.0
+eps_mu= 23.0                 
+L_nubar_f= 8.0                #units of 1e51 ergs/s 
+L_nu_f= 6.15384
+L_mu_f= 5.714
+eps_nubar_f= 14.0             #MeV
+eps_nu_f= 11.0
+eps_mu_f = 23.0
+t_L_0= 1000.0
+t_L_1= 10000.0
+file=My_IC_rho12_ye_r16000km.txt
+rows=22784
+cols= 6
+col_rho=0
+col_v=1
+col_T=2
+col_p=3
+col_ye=4
+T_cutoff=0.0 #MeV, 0.5 MeV to turn off heating due to alpha partices
+set_T_at_r0 = false
+inner_BC_choice = 2 #choose one of the 4 inner BCs
+B_0= 3e15
+alpha= 0.0
+Omega_0= 31.4159
+rot_flag = false
+cs = false
+rot_option=0 #1 for old_rot, 2 for zhu_rot
+source_choice=0
+vr_choice = 0
+vth_choice = 0
+r_compute = 5e6
+Mpns = 1.4
+Omega_dot = 0.0

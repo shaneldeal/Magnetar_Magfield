@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --account=PAS2229
+#SBATCH --time=10:30:00
+#SBATCH --job-name=athena
+#SBATCH --nodes=7
+#SBATCH --ntasks=256
+#SBATCH --mail-type=ALL
+#SBATCH --export=ALL
+#SBATCH --open-mode=append
+
+
+module load intel-oneapi-mpi/2021.12.1
+module load hdf5/1.14.3
+unset I_MPI_PMI_LIBRARY
+set -x
+
+
+cd $SLURM_SUBMIT_DIR
+
+python configure.py --prob parker_eos_qw_tempscalar --eos general/qw_eos --coord spherical_polar --nscalars 2 -h5double -mpi -b -hdf5 --hdf5_path $HDF5_HOME
+make clean
+make
+
+
+mkdir out_mag
+cp athinput_helm_Lt.parker out_mag
+cp 	My_IC_rho12_ye_r16000km.txt out_mag
+mpiexec -n 256 bin/athena -i out_mag/athinput_helm_Lt.parker -d out_mag/
