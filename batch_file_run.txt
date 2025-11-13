@@ -26,4 +26,4 @@ make
 mkdir out_mag_redo_111025_a
 cp athinput_helm_Lt.parker out_mag_redo_111025_a
 cp 	My_IC_rho12_ye_r16000km.txt out_mag_redo_111025_a
-mpiexec -n 256 bin/athena -i out_mag_redo_111025_a/athinput_helm_Lt.parker -d out_mag_redo_11102_a/
+mpiexec -n 256 bin/athena -i out_mag_redo_111025_a/athinput_helm_Lt.parker -d out_mag_redo_111025_a/
