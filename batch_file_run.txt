@@ -9,6 +9,7 @@
 #SBATCH --open-mode=append
 
 
+module load oneapi/2024.1.0
 module load intel-oneapi-mpi/2021.12.1
 module load hdf5/1.14.3
 unset I_MPI_PMI_LIBRARY
@@ -22,7 +23,7 @@ make clean
 make
 
 
-mkdir out_mag
-cp athinput_helm_Lt.parker out_mag
-cp 	My_IC_rho12_ye_r16000km.txt out_mag
-mpiexec -n 256 bin/athena -i out_mag/athinput_helm_Lt.parker -d out_mag/
+mkdir out_mag_redo_111025_a
+cp athinput_helm_Lt.parker out_mag_redo_111025_a
+cp 	My_IC_rho12_ye_r16000km.txt out_mag_redo_111025_a
+mpiexec -n 256 bin/athena -i out_mag_redo_111025_a/athinput_helm_Lt.parker -d out_mag_redo_11102_a/
