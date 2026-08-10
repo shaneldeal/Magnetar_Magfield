@@ -1,29 +1,45 @@
 #!/bin/bash
 #SBATCH --account=PAS2229
-#SBATCH --time=10:30:00
+#SBATCH --time=02:00:00
 #SBATCH --job-name=athena
-#SBATCH --nodes=7
-#SBATCH --ntasks=256
+#SBATCH --nodes=1
+#SBATCH --ntasks=8
 #SBATCH --mail-type=ALL
 #SBATCH --export=ALL
 #SBATCH --open-mode=append
 
-
-module load oneapi/2024.1.0
-module load intel-oneapi-mpi/2021.12.1
+module load intel-oneapi-mpi/2021.10.0
 module load hdf5/1.14.3
 unset I_MPI_PMI_LIBRARY
 set -x
 
-
 cd $SLURM_SUBMIT_DIR
 
-python configure.py --prob parker_eos_qw_tempscalar --eos general/qw_eos --coord spherical_polar --nscalars 2 -h5double -mpi -b -hdf5 --hdf5_path $HDF5_HOME
+python configure.py --prob parker_eos_qw_tempscalar --eos general/qw_eos --coord spherical_polar --nscalars 2 -h5double -mpi -hdf5 --hdf5_path $HDF5_HOME --cflag=-fp-model=precise --cxx icpx
 make clean
 make
 
+# Define a local temporary output directory on the compute node
+LOCAL_OUT="/tmp/test081026_1D_lnu_6_128zones"
+mkdir -p $LOCAL_OUT
 
-mkdir out_mag_redo_111025_a
-cp athinput_helm_Lt.parker out_mag_redo_111025_a
-cp 	My_IC_rho12_ye_r16000km.txt out_mag_redo_111025_a
-mpiexec -n 256 bin/athena -i out_mag_redo_111025_a/athinput_helm_Lt.parker -d out_mag_redo_111025_a/
+# Copy necessary input/IC files to the base folder as before
+mkdir -p test081026_1D_lnu_6_128zones
+cp athinput_helm_Lt.parker test081026_1D_lnu_6_128zones
+cp My_IC_rho12_ye_r16000km.txt test081026_1D_lnu_6_128zones/
+
+# 1. Run the simulation
+# We add '|| true' so that even if athena crashes, the script continues to the next line
+# Notice we target the local /tmp directory for outputs (-d)
+export ROMIO_HINTS=romio_no_locks=true
+mpiexec -n 8 ./bin/athena -i test081026_1D_lnu_6_128zones/athinput_helm_Lt.parker -d $LOCAL_OUT || true
+
+# 2. Add a small pause to let the system flush the log file
+sleep 5
+
+# 3. Move/Copy output files from local /tmp back to your permanent project directory
+# (Using cp or mv so they aren't lost when the job finishes and /tmp is wiped)
+cp -r $LOCAL_OUT/* test081026_1D_lnu_6_128zones/
+
+# 4. Now perform the copy of the slurm output log
+cp slurm-$SLURM_JOB_ID.out test081026_1D_lnu_6_128zones/
